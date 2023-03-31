@@ -1,80 +1,49 @@
+import SpotifyAPI as sapi
+api= sapi.SpotifyAPI()
 
-import requests
-import logging
-import secret_env as secret
+print("Welcome to Spotify API")
+print("Enter '1' for search: ")
+print("Enter '2' to get any track info: ")
+print("Enter '3' to get album: ")
+print("Enter '4' to get any artist info: ")
+response= int(input("ENTER YOUR RESPONSE:"))
 
-# ========================================
+if response==1:
+    cat= input("Enter category: ")
+    que= input("Enter query: ")
+    if cat != "" and que != "":
+        api.search_for_item( category=cat, query=que)
+    else:
+        api.search_for_item()
+    
+elif response==2:
+    cat= input("Enter track id: ")
+    if cat != "" :
+        api.get_track_info(track_id=cat)
+    else:
+        api.get_track_info()
 
-class SpotifyAPI():
-    def __init__(self, url='https://accounts.spotify.com/api/token'):
-        print('Welcome to the Spotify API')
-        self.AUTH_URL=  url 
-        self.access_token = self.get_Access_Token()        
-        self.BASE_URL = 'https://api.spotify.com/v1/'
+elif response==3:
+    cat= input("Enter album id: ")
+    if cat != "" :
+        api.get_album(album_id=cat)
+    else:
+        api.get_album()
 
+elif response==4:
+    cat= input("Enter artist id: ")
+    
+    if cat != "" :
+        api.get_artist_info(artist_id=cat)
+    else:
+        api.get_artist_info()
+    
 
-# POST
-    def get_Access_Token(self):
-        try:
-            auth_response= requests.post(self.AUTH_URL, {
-                'grant_type': 'client_credentials',
-                'client_id':secret.CLIENT_ID,
-                'client_secret': secret.CLIENT_SECRET,
-            })
-        except Exception as err:
-            print(err)
-            logging.info(f'[!Error]:', {err})
-
-
-        # convert the response to JSON
-        auth_response_data = auth_response.json()
-        # print(auth_response_data)
-        # save the access token
-        access_token = auth_response_data['access_token']
-
-        print(access_token)
-        return access_token
+else:
+    print("Enter a valid option")
 
 
 
-    def headers(self):
-        headers = {
-            'Authorization': 'Bearer {token}'.format(token=self.access_token)
-        }
-        return headers
 
-# actual GET request with proper header
 
-    def get_track_info(self, track_id='6y0igZArWVi6Iz0rj35c1Y'):
-        try:
-            r = requests.get(self.BASE_URL + 'audio-features/' + track_id, headers=self.headers())
-            r= r.json()
-            print(r)
-            return r
-        except Exception as err:
-            print(err)
-            logging.info(f'[!Error]:', {err})    
 
-    def get_artist_info(self, artist_id='36QJpDe2go2KgaRleHCDTp'):
-        try:
-            r = requests.get(self.BASE_URL + 'artists/' + artist_id + '/albums', 
-                    headers=self.headers(), 
-                    params={'include_groups': 'album', 'limit': 50})
-            d = r.json()
-            # print(d)
-
-            for album in d['items']:
-                print(album['name'], ' --- ', album['release_date'])
-        except Exception as err:
-            print(err)
-            logging.info(f'[!Error]:', {err})
-        # return d
-
-    def main(self):
-        self.get_Access_Token()
-        self.get_track_info()
-        self.get_artist_info()
-        
-
-obj = SpotifyAPI()
-obj.main()
